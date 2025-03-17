@@ -1,0 +1,23 @@
+{
+  "users": [
+    {
+      "username": "testuser",
+      "password": "testpass"
+    },
+    {
+      "username": "testuser",
+      "password": "testpass"
+    },
+    {
+      "username": "testuser",
+      "password": "testpass"
+    },
+    {
+      "full_name": "Oluwaleye Taiwo",
+      "email": "oluwaleyemicheal8225@gmail.com",
+      "phone_number": "0802534228",
+      "password": "$2b$10$94lO69AK6TCUt.RcKHiQROWpio/XFZcgIYt2VCivmSfxPp8cf1D5S"
+    }
+  ],
+  "tasks": []
+}
