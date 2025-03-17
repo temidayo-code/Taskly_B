@@ -9,7 +9,7 @@ const bcrypt = require("bcryptjs"); // Import bcrypt
 require("dotenv").config(); // Load environment variables
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000; // Use Glitch's PORT or fallback to 3000
 
 // Middleware
 app.use(
@@ -111,7 +111,13 @@ app.get("/tasks", authenticateToken, (req, res) => {
   res.json(tasks);
 });
 
+// Add a GET route to display a welcome message
+app.get("/", (req, res) => {
+  res.send("Welcome to the Todo List API!"); // Message displayed on the screen
+});
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
+  console.log("Server is running fine on Glitch!");
 });
