@@ -5,7 +5,7 @@ const fs = require("fs");
 const path = require("path");
 const jwt = require("jsonwebtoken");
 const cors = require("cors"); // Import the cors package
-const bcrypt = require("bcrypt"); // Import bcrypt
+const bcrypt = require("bcryptjs"); // Import bcrypt
 require("dotenv").config(); // Load environment variables
 
 const app = express();
