@@ -12,7 +12,13 @@ const app = express();
 const PORT = 3000;
 
 // Middleware
-app.use(cors()); // Enable CORS for all routes
+app.use(
+  cors({
+    origin: "https://todo-list-three-mauve-12.vercel.app", // Allow only your frontend
+    methods: "GET,POST,PATCH,DELETE",
+    allowedHeaders: "Content-Type,Authorization",
+  })
+);
 app.use(bodyParser.json());
 
 // Load data from JSON file
