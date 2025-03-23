@@ -1,23 +1,94 @@
 {
   "users": [
     {
-      "username": "testuser",
-      "password": "testpass"
-    },
-    {
-      "username": "testuser",
-      "password": "testpass"
-    },
-    {
-      "username": "testuser",
-      "password": "testpass"
-    },
-    {
+      "id": "taskly-001",
       "full_name": "Oluwaleye Taiwo",
-      "email": "oluwaleyemicheal8225@gmail.com",
+      "email": "oluwaleyetaiwo8225@gmail.com",
       "phone_number": "0802534228",
-      "password": "$2b$10$94lO69AK6TCUt.RcKHiQROWpio/XFZcgIYt2VCivmSfxPp8cf1D5S"
+      "password": "$2b$10$t4XUwyVM6Y7G.jqbB8bYmuyrrXTjcXHRTkYb1SThfNBFaal3Jw4qa",
+      "profile_image": null
     }
   ],
-  "tasks": []
+  "tasks": [
+    {
+      "id": "1742668145958",
+      "title": "hello",
+      "description": "asdfghj",
+      "allDay": false,
+      "startDateTime": "2025-03-22T18:28:56.623Z",
+      "endDateTime": "2025-03-22T18:28:56.623Z",
+      "status": "pending",
+      "user_id": "taskly-001",
+      "createdAt": "2025-03-22T18:29:05.959Z",
+      "updatedAt": "2025-03-22T18:29:05.959Z"
+    },
+    {
+      "id": "1742668211917",
+      "title": "hrsdfgh",
+      "description": "Organize and prioritize tasks for tomorrowOrganize and prioritize tasks for tomorrowOrganize and prioritize tasks for tomorrowOrganize and prioritize tasks for tomorrowOrganize and prioritize tasks for tomorrow",
+      "allDay": false,
+      "startDateTime": "2025-03-22T18:29:52.012Z",
+      "endDateTime": "2025-03-22T18:29:52.012Z",
+      "status": "pending",
+      "user_id": "taskly-001",
+      "createdAt": "2025-03-22T18:30:11.917Z",
+      "updatedAt": "2025-03-22T18:30:11.917Z"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "1234567891",
+      "user_id": "taskly-001",
+      "title": "Reminder: Complete Your Task",
+      "message": "Hey Oluwaleye Taiwo, don't forget to complete your pending tasks for today!",
+      "type": "reminder",
+      "read": false,
+      "createdAt": "2024-03-22T12:00:00.000Z"
+    },
+    {
+      "id": "1234567892",
+      "user_id": "taskly-001",
+      "title": "Task Completed 🎉",
+      "message": "Great job, Oluwaleye Taiwo! You've completed your task successfully. Keep it up!",
+      "type": "success",
+      "read": false,
+      "createdAt": "2024-03-22T14:30:00.000Z"
+    },
+    {
+      "id": "1234567893",
+      "user_id": "taskly-001",
+      "title": "New Feature Alert 🚀",
+      "message": "Hey Oluwaleye Taiwo, check out our new feature that makes task management even easier!",
+      "type": "update",
+      "read": false,
+      "createdAt": "2024-03-22T16:45:00.000Z"
+    },
+    {
+      "id": "1234567894",
+      "user_id": "taskly-001",
+      "title": "Your Weekly Progress Report",
+      "message": "Hello Oluwaleye Taiwo, here’s your weekly progress report. Keep pushing forward!",
+      "type": "report",
+      "read": false,
+      "createdAt": "2024-03-22T18:00:00.000Z"
+    },
+    {
+      "id": "1234567895",
+      "user_id": "taskly-001",
+      "title": "Task Overdue ⚠️",
+      "message": "Hey Oluwaleye Taiwo, you have overdue tasks that need your attention. Please check your list.",
+      "type": "warning",
+      "read": false,
+      "createdAt": "2024-03-22T20:15:00.000Z"
+    },
+    {
+      "id": "1234567896",
+      "user_id": "taskly-001",
+      "title": "Motivation for the Day 💡",
+      "message": "Hey Oluwaleye Taiwo, remember: 'Success is the sum of small efforts repeated day in and day out.' Keep going!",
+      "type": "motivation",
+      "read": false,
+      "createdAt": "2024-03-22T22:30:00.000Z"
+    }
+  ]
 }
