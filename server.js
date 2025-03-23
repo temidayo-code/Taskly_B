@@ -33,7 +33,15 @@ let tasks = data.tasks; // This should be data.tasks instead of empty array
 function saveData() {
   fs.writeFileSync(
     dataFilePath,
-    JSON.stringify({ users, tasks, notifications: data.notifications }, null, 2)
+    JSON.stringify(
+      {
+        users: users,
+        tasks: tasks,
+        notifications: data.notifications,
+      },
+      null,
+      2
+    )
   );
 }
 
@@ -60,6 +68,56 @@ transporter.verify(function (error, success) {
     console.log("Email server is ready to send messages");
   }
 });
+
+// Example notification types
+const NOTIFICATION_TYPES = {
+  WELCOME: "welcome",
+  TASK_CREATED: "task_created",
+  TASK_COMPLETED: "task_completed",
+  TASK_DUE: "task_due",
+};
+
+// Create notification function
+function createNotification(userId, type, data) {
+  // Create the notification object
+  const notification = {
+    id: Date.now().toString(),
+    user_id: userId,
+    type: type,
+    read: false,
+    createdAt: new Date().toISOString(),
+  };
+
+  // Set title and message based on type
+  switch (type) {
+    case NOTIFICATION_TYPES.WELCOME:
+      notification.title = "Welcome to Taskly!";
+      notification.message = `Hello ${data.full_name}, welcome to Taskly!`;
+      break;
+    case NOTIFICATION_TYPES.TASK_CREATED:
+      notification.title = "New Task Created";
+      notification.message = `Task "${data.title}" has been created`;
+      break;
+    case NOTIFICATION_TYPES.TASK_COMPLETED:
+      notification.title = "Task Completed";
+      notification.message = `Task "${data.title}" has been marked as completed`;
+      break;
+    case NOTIFICATION_TYPES.TASK_DUE:
+      notification.title = "Task Due Soon";
+      notification.message = `Task "${data.title}" is due in 24 hours`;
+      break;
+  }
+
+  // Initialize notifications array if it doesn't exist
+  if (!data.notifications) {
+    data.notifications = [];
+  }
+
+  // Save notification
+  data.notifications.push(notification);
+  saveData();
+  return notification;
+}
 
 // Register a new user
 app.post("/register", async (req, res) => {
@@ -178,22 +236,11 @@ app.post("/register", async (req, res) => {
     }
 
     // After successful registration and email sending
-    const welcomeNotification = {
-      id: Date.now().toString(),
-      user_id: newId,
-      title: "Welcome to Taskly!",
-      message: `Hello ${full_name}, welcome to Taskly! We're excited to have you on board.`,
-      type: "welcome",
-      read: false,
-      createdAt: new Date().toISOString(),
-    };
-
-    // Add notification to user's notifications (you'll need to add a notifications array to your db.json)
-    if (!data.notifications) {
-      data.notifications = [];
-    }
-    data.notifications.push(welcomeNotification);
-    saveData();
+    const welcomeNotification = createNotification(
+      newId,
+      NOTIFICATION_TYPES.WELCOME,
+      { full_name }
+    );
 
     res.status(201).json({
       message: "User registered successfully",
@@ -273,7 +320,19 @@ app.post("/tasks", authenticateToken, (req, res) => {
 
     tasks.push(newTask);
     saveData(); // Save data to file
-    res.status(201).json({ message: "Task added successfully", task: newTask });
+
+    // Create task notification with proper data object
+    const taskNotification = createNotification(
+      req.user.id,
+      NOTIFICATION_TYPES.TASK_CREATED,
+      { title: task.title } // Pass an object with title
+    );
+
+    res.status(201).json({
+      message: "Task added successfully",
+      task: newTask,
+      notification: taskNotification,
+    });
   } catch (error) {
     console.error("Error adding task:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -298,7 +357,6 @@ app.patch("/tasks/:id", authenticateToken, (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    // Find task index
     const taskIndex = tasks.findIndex(
       (task) => task.id === id && task.user_id === req.user.id
     );
@@ -310,16 +368,27 @@ app.patch("/tasks/:id", authenticateToken, (req, res) => {
     }
 
     // Update task
-    tasks[taskIndex] = {
+    const updatedTask = {
       ...tasks[taskIndex],
       status,
       updatedAt: new Date().toISOString(),
     };
+    tasks[taskIndex] = updatedTask;
 
     // Save to file
     saveData();
 
-    res.json(tasks[taskIndex]);
+    // Create completion notification if task is completed
+    if (status === "completed") {
+      const completionNotification = createNotification(
+        req.user.id,
+        NOTIFICATION_TYPES.TASK_COMPLETED,
+        { title: updatedTask.title }
+      );
+    }
+
+    // Return the updated task
+    res.json(updatedTask);
   } catch (error) {
     console.error("Error updating task:", error);
     res.status(500).json({ error: "Internal server error" });
