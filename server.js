@@ -22,8 +22,19 @@ let data = { users: [], tasks: [], notifications: [] };
 
 // Check if the db.json file exists and load data
 if (fs.existsSync(dataFilePath)) {
-  const fileData = fs.readFileSync(dataFilePath);
-  data = JSON.parse(fileData);
+  try {
+    const fileData = fs.readFileSync(dataFilePath);
+    data = JSON.parse(fileData);
+    console.log("Loaded data from db.json:");
+    console.log("Users:", data.users.length);
+    console.log("Notifications:", data.notifications.length);
+  } catch (error) {
+    console.error("Error parsing db.json:", error);
+    data = { users: [], tasks: [], notifications: [] };
+  }
+} else {
+  console.log("db.json file not found, creating empty data structure");
+  data = { users: [], tasks: [], notifications: [] };
 }
 
 let users = data.users; // array of users
@@ -31,18 +42,26 @@ let tasks = data.tasks; // This should be data.tasks instead of empty array
 
 // Function to save data to JSON file
 function saveData() {
-  fs.writeFileSync(
-    dataFilePath,
-    JSON.stringify(
-      {
-        users: users,
-        tasks: tasks,
-        notifications: data.notifications,
-      },
-      null,
-      2
-    )
-  );
+  try {
+    console.log("Attempting to save to:", dataFilePath);
+    console.log("Current db state - notifications count:", data.notifications.length);
+
+    fs.writeFileSync(
+      dataFilePath,
+      JSON.stringify(
+        {
+          users: users,
+          tasks: tasks,
+          notifications: data.notifications,
+        },
+        null,
+        2
+      )
+    );
+    console.log("Save successful");
+  } catch (error) {
+    console.error("Error saving to db.json:", error);
+  }
 }
 
 // Create email transporter with more detailed configuration
@@ -75,49 +94,121 @@ const NOTIFICATION_TYPES = {
   TASK_CREATED: "task_created",
   TASK_COMPLETED: "task_completed",
   TASK_DUE: "task_due",
+  TASK_OVERDUE: "task_overdue",
+  TASK_UPDATED: "task_updated",
+  DAILY_SUMMARY: "daily_summary",
 };
 
 // Create notification function
-function createNotification(userId, type, data) {
-  // Create the notification object
-  const notification = {
-    id: Date.now().toString(),
-    user_id: userId,
-    type: type,
-    read: false,
-    createdAt: new Date().toISOString(),
-  };
+function createNotification(userId, type, notifyData) {
+  try {
+    // Create the notification object
+    const notification = {
+      id: Date.now().toString(),
+      user_id: userId,
+      type: type,
+      title: "",
+      message: "",
+      read: false,
+      createdAt: new Date().toISOString(),
+      isHtml: false,
+    };
 
-  // Set title and message based on type
-  switch (type) {
-    case NOTIFICATION_TYPES.WELCOME:
-      notification.title = "Welcome to Taskly!";
-      notification.message = `Hello ${data.full_name}, welcome to Taskly!`;
-      break;
-    case NOTIFICATION_TYPES.TASK_CREATED:
-      notification.title = "New Task Created";
-      notification.message = `Task "${data.title}" has been created`;
-      break;
-    case NOTIFICATION_TYPES.TASK_COMPLETED:
-      notification.title = "Task Completed";
-      notification.message = `Task "${data.title}" has been marked as completed`;
-      break;
-    case NOTIFICATION_TYPES.TASK_DUE:
-      notification.title = "Task Due Soon";
-      notification.message = `Task "${data.title}" is due in 24 hours`;
-      break;
+    // Set notification content based on type
+    switch (type) {
+      case "welcome":
+        notification.title = "Welcome to Taskly!";
+        notification.message = `
+          <p>Hello ${notifyData.full_name},</p>
+          <p>Thank you for joining Taskly! We're excited to have you on board.</p>
+          <p>With Taskly, you can:</p>
+          <ul>
+            <li>Create and manage your daily tasks</li>
+            <li>Track your progress</li>
+            <li>Stay organized and productive</li>
+          </ul>
+          <p>Get started by creating your first task!</p>
+          <p>Best regards,<br>Taskly Team</p>
+        `.trim();
+        notification.isHtml = true;
+        break;
+      case "task_created":
+        notification.title = "New Task Created";
+        notification.message = `Task "${notifyData.title}" has been created`;
+        break;
+      case "task_completed":
+        notification.title = "Task Completed";
+        notification.message = `Task "${notifyData.title}" has been marked as completed`;
+        break;
+    }
+
+    // THIS IS THE KEY FIX: Update both the file AND the in-memory data
+    // Add to in-memory notifications array first
+    if (!data.notifications) {
+      data.notifications = [];
+    }
+    data.notifications.push(notification);
+
+    // Then save to file
+    saveData();
+
+    console.log("Notification saved successfully");
+    console.log("Updated in-memory notifications:", data.notifications.length);
+    return notification;
+  } catch (error) {
+    console.error("Error in createNotification:", error);
+    throw error;
   }
-
-  // Initialize notifications array if it doesn't exist
-  if (!data.notifications) {
-    data.notifications = [];
-  }
-
-  // Save notification
-  data.notifications.push(notification);
-  saveData();
-  return notification;
 }
+
+// Add a function to check for due and overdue tasks
+function checkTasksDueStatus() {
+  const now = new Date();
+
+  tasks.forEach((task) => {
+    if (task.status !== "completed") {
+      const dueDate = new Date(task.endDateTime);
+      const timeDiff = dueDate - now;
+      const hoursDiff = timeDiff / (1000 * 60 * 60);
+
+      // Check for tasks due in 24 hours
+      if (hoursDiff > 0 && hoursDiff <= 24) {
+        createNotification(task.user_id, NOTIFICATION_TYPES.TASK_DUE, {
+          title: task.title,
+        });
+      }
+      // Check for overdue tasks
+      else if (hoursDiff < 0) {
+        createNotification(task.user_id, NOTIFICATION_TYPES.TASK_OVERDUE, {
+          title: task.title,
+        });
+      }
+    }
+  });
+}
+
+// Add a function to send daily summary
+function sendDailySummary() {
+  users.forEach((user) => {
+    const userTasks = tasks.filter(
+      (task) => task.user_id === user.id && task.status === "pending"
+    );
+
+    createNotification(user.id, NOTIFICATION_TYPES.DAILY_SUMMARY, {
+      pendingCount: userTasks.length,
+    });
+  });
+}
+
+// Set up periodic checks (every hour for due tasks, daily for summary)
+setInterval(checkTasksDueStatus, 1000 * 60 * 60); // Every hour
+setInterval(() => {
+  const now = new Date();
+  if (now.getHours() === 9) {
+    // At 9 AM
+    sendDailySummary();
+  }
+}, 1000 * 60 * 60); // Check every hour
 
 // Register a new user
 app.post("/register", async (req, res) => {
@@ -236,11 +327,10 @@ app.post("/register", async (req, res) => {
     }
 
     // After successful registration and email sending
-    const welcomeNotification = createNotification(
-      newId,
-      NOTIFICATION_TYPES.WELCOME,
-      { full_name }
-    );
+    const welcomeNotification = createNotification(newId, "welcome", {
+      full_name: full_name,
+      message: `Hello ${full_name},\n\nThank you for joining Taskly! We're excited to have you on board.\n\nWith Taskly, you can:\n\n✅ Create and manage your daily tasks\n✅ Track your progress\n✅ Stay organized and productive\n\nGet started by creating your first task!`,
+    });
 
     res.status(201).json({
       message: "User registered successfully",
@@ -268,14 +358,15 @@ app.post("/login", async (req, res) => {
       // Send the token, full name, and email back to the client
       res.json({
         token,
-        full_name: user.full_name, // Include full name
-        email: user.email, // Include email
+        id: user.id, // Include the user ID
+        full_name: user.full_name,
+        email: user.email,
       });
     } else {
-      res.status(401).send("Incorrect password"); // Password is incorrect
+      res.status(401).send("Incorrect password");
     }
   } else {
-    res.status(401).send("Email not found"); // Email is not registered
+    res.status(401).send("Email not found");
   }
 });
 
@@ -287,11 +378,15 @@ function authenticateToken(req, res, next) {
   if (!token) return res.sendStatus(401);
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.sendStatus(403); // Invalid token
+    if (err) {
+      console.log("Token verification error:", err);
+      return res.sendStatus(403); // Invalid token
+    }
 
     // Find the full user object from users array
     const fullUser = users.find((u) => u.email === user.email);
     if (!fullUser) {
+      console.log("User not found for email:", user.email);
       return res.sendStatus(403);
     }
 
@@ -321,17 +416,15 @@ app.post("/tasks", authenticateToken, (req, res) => {
     tasks.push(newTask);
     saveData(); // Save data to file
 
-    // Create task notification with proper data object
-    const taskNotification = createNotification(
-      req.user.id,
-      NOTIFICATION_TYPES.TASK_CREATED,
-      { title: task.title } // Pass an object with title
-    );
+    // Create notification for new task
+    const notification = createNotification(req.user.id, "task_created", {
+      title: newTask.title,
+    });
 
     res.status(201).json({
       message: "Task added successfully",
       task: newTask,
-      notification: taskNotification,
+      notification: notification,
     });
   } catch (error) {
     console.error("Error adding task:", error);
@@ -378,13 +471,11 @@ app.patch("/tasks/:id", authenticateToken, (req, res) => {
     // Save to file
     saveData();
 
-    // Create completion notification if task is completed
+    // If task is completed
     if (status === "completed") {
-      const completionNotification = createNotification(
-        req.user.id,
-        NOTIFICATION_TYPES.TASK_COMPLETED,
-        { title: updatedTask.title }
-      );
+      createNotification(req.user.id, "task_completed", {
+        title: updatedTask.title,
+      });
     }
 
     // Return the updated task
@@ -400,15 +491,62 @@ app.get("/", (req, res) => {
   res.send("Welcome to the Todo List API!"); // Message displayed on the screen
 });
 
-// Add a new endpoint to fetch notifications
+// Add a more thorough endpoint to fetch notifications
 app.get("/notifications", authenticateToken, (req, res) => {
   try {
+    console.log("Fetching notifications for user:", req.user.id);
+    console.log("Current in-memory notifications:", data.notifications.length);
+    
+    // Debug notifications
+    if (data.notifications.length > 0) {
+      console.log("First notification:", data.notifications[0]);
+    }
+    
     const userNotifications = data.notifications.filter(
       (notif) => notif.user_id === req.user.id
     );
+    
+    console.log(`Found ${userNotifications.length} notifications for user ${req.user.id}`);
+    
     res.json(userNotifications);
   } catch (error) {
+    console.error("Error in /notifications endpoint:", error);
     res.status(500).json({ error: "Error fetching notifications" });
+  }
+});
+
+// Add an endpoint to mark a notification as read
+app.patch("/notifications/:id", authenticateToken, (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Find the notification index
+    const notificationIndex = data.notifications.findIndex(
+      (notif) => notif.id === id && notif.user_id === req.user.id
+    );
+    
+    if (notificationIndex === -1) {
+      return res.status(404).json({
+        error: "Notification not found or unauthorized"
+      });
+    }
+    
+    // Update notification
+    const updatedNotification = {
+      ...data.notifications[notificationIndex],
+      read: true
+    };
+    
+    data.notifications[notificationIndex] = updatedNotification;
+    
+    // Save updated data
+    saveData();
+    
+    // Return the updated notification
+    res.json(updatedNotification);
+  } catch (error) {
+    console.error("Error updating notification:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
