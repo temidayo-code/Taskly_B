@@ -4,24 +4,93 @@
       "id": "taskly-001",
       "full_name": "Oluwaleye Taiwo",
       "email": "oluwaleyetaiwo8225@gmail.com",
-      "phone_number": "0802534228",
-      "password": "$2b$10$3klOnAPIj4VfpM78rA6.deG6ActOFY6H4bz1gVRLyqZOUgLtIGG5i",
+      "phone_number": "08135441945",
+      "password": "$2b$10$JEenrTuziIsAHqggWxDDBetqBDWGENhAoqxaF1ANEIOr//0YyZSrm",
+      "profile_image": null
+    },
+    {
+      "id": "taskly-002",
+      "full_name": "Gbenle Gbolahan",
+      "email": "hassangbenle@gmail.com",
+      "phone_number": "08135441945",
+      "password": "$2b$10$JsNYvBFbDlh77C/y5Ve1Fu6luwVNvL.T9J2nhc9Au8IQw.c8z4VJ.",
       "profile_image": null
     }
   ],
   "tasks": [
     {
-      "id": "1742759953273",
-      "title": "webg",
-      "description": "sgzsd",
+      "id": "1742851184233",
+      "title": "Hello",
+      "description": "Yes",
       "allDay": false,
-      "startDateTime": "2025-03-31T19:58:36.230Z",
-      "endDateTime": "2025-04-30T22:58:00.000Z",
+      "startDateTime": "2025-03-24T21:19:35.650Z",
+      "endDateTime": "2025-03-24T21:19:35.650Z",
       "status": "completed",
       "user_id": "taskly-001",
-      "createdAt": "2025-03-23T19:59:13.273Z",
-      "updatedAt": "2025-03-23T21:27:49.104Z"
+      "createdAt": "2025-03-24T21:19:44.233Z",
+      "updatedAt": "2025-03-24T21:20:27.608Z"
     }
   ],
-  "notifications": []
+  "notifications": [
+    {
+      "id": "1742839901909",
+      "user_id": "taskly-001",
+      "type": "welcome",
+      "title": "Welcome to Taskly!",
+      "message": "<p>Hello Oluwaleye Taiwo,</p>\n          <p>Thank you for joining Taskly! We're excited to have you on board.</p>\n          <p>With Taskly, you can:</p>\n          <ul>\n            <li>Create and manage your daily tasks</li>\n            <li>Track your progress</li>\n            <li>Stay organized and productive</li>\n          </ul>\n          <p>Get started by creating your first task!</p>\n          <p>Best regards,<br>Taskly Team</p>",
+      "read": true,
+      "createdAt": "2025-03-24T18:11:41.909Z",
+      "isHtml": true
+    },
+    {
+      "id": "1742840042401",
+      "user_id": "taskly-002",
+      "type": "welcome",
+      "title": "Welcome to Taskly!",
+      "message": "<p>Hello Gbenle Gbolahan,</p>\n          <p>Thank you for joining Taskly! We're excited to have you on board.</p>\n          <p>With Taskly, you can:</p>\n          <ul>\n            <li>Create and manage your daily tasks</li>\n            <li>Track your progress</li>\n            <li>Stay organized and productive</li>\n          </ul>\n          <p>Get started by creating your first task!</p>\n          <p>Best regards,<br>Taskly Team</p>",
+      "read": true,
+      "createdAt": "2025-03-24T18:14:02.401Z",
+      "isHtml": true
+    },
+    {
+      "id": "1742851184238",
+      "user_id": "taskly-001",
+      "type": "task_created",
+      "title": "New Task Created",
+      "message": "Task \"Hello\" has been created",
+      "read": true,
+      "createdAt": "2025-03-24T21:19:44.238Z",
+      "isHtml": false
+    },
+    {
+      "id": "1742851214409",
+      "user_id": "taskly-001",
+      "type": "task_completed",
+      "title": "Task Completed",
+      "message": "Task \"Hello\" has been marked as completed",
+      "read": false,
+      "createdAt": "2025-03-24T21:20:14.409Z",
+      "isHtml": false
+    },
+    {
+      "id": "1742851216301",
+      "user_id": "taskly-001",
+      "type": "task_completed",
+      "title": "Task Completed",
+      "message": "Task \"Hello\" has been marked as completed",
+      "read": false,
+      "createdAt": "2025-03-24T21:20:16.301Z",
+      "isHtml": false
+    },
+    {
+      "id": "1742851227611",
+      "user_id": "taskly-001",
+      "type": "task_completed",
+      "title": "Task Completed",
+      "message": "Task \"Hello\" has been marked as completed",
+      "read": false,
+      "createdAt": "2025-03-24T21:20:27.611Z",
+      "isHtml": false
+    }
+  ]
 }
